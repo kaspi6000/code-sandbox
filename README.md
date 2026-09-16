@@ -1,32 +1,27 @@
-# React + TypeScript + Vite
+# code-sandbox
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Turborepo 모노리포입니다. npm workspaces로 앱과 공유 패키지를 관리합니다.
 
-Currently, two official plugins are available:
+## 구조
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- `apps/web` — Vite + React 앱 (`@repo/web`)
+- `packages/ui` — 공유 UI 컴포넌트 (`@repo/ui`)
+- `packages/typescript-config` — 공유 TypeScript 설정 (`@repo/typescript-config`)
 
-## React Compiler
+## 명령
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+루트에서 실행합니다.
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev          # 모든 앱 개발 서버
+npm run build        # 모든 패키지 빌드
+npm run lint         # 린트
+npm run check-types  # 타입 체크
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+특정 워크스페이스만 실행하려면:
+
+```bash
+npx turbo run dev --filter=@repo/web
+```
