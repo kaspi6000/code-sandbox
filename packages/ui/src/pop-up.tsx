@@ -1,8 +1,21 @@
-import type { MouseEvent, ReactNode } from 'react'
-// import { createPortal } from 'react-dom'
-import { createRoot } from 'react-dom/client'
+import { useEffect, useState, type MouseEvent, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
+
+import { nanoid } from 'nanoid'
 
 type Content = () => ReactNode
+
+type Popup = {
+  id: string
+  content: ReactNode
+}
+
+let Popups: Popup[] = []
+const listeners = new Set<() => void>()
+
+function emit() {
+  listeners.forEach((listener) => listener())
+}
 
 function Overlay({
   children,
@@ -37,23 +50,38 @@ function Overlay({
 }
 
 function open(renderContent: Content) {
-  const container = document.createElement('div')
-  document.body.appendChild(container)
-  const root = createRoot(container)
+  const id = nanoid()
+  Popups = [...Popups, { id, content: renderContent() }]
+  emit()
+}
 
-  const close = () => {
-    root.unmount()
-    container.remove()
-  }
+function close(id: string) {
+  Popups = Popups.filter((popup) => popup.id !== id)
+  emit()
+}
 
-  // createPortal(
-  //   <Overlay onClose={close}>{renderContent()}</Overlay>,
-  //   document.body
-  // )
+function Render() {
+  const [, rerender] = useState(0)
 
-  root.render(<Overlay onClose={close}>{renderContent()}</Overlay>)
+  useEffect(() => {
+    const onChange = () => rerender((n) => n + 1)
+    listeners.add(onChange)
+    return () => {
+      listeners.delete(onChange)
+    }
+  }, [])
+
+  return createPortal(
+    Popups.map((popup) => (
+      <Overlay key={popup.id} onClose={() => close(popup.id)}>
+        {popup.content}
+      </Overlay>
+    )),
+    document.body,
+  )
 }
 
 export const PopUp = {
   open,
+  render: Render,
 }
